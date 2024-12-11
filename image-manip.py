@@ -14,6 +14,9 @@ def init():
     parser.add_argument('-c', '--crop', nargs=4, type=int,
                         help='Crop the imagens, require 4 args:\
                         top, bottom, left and right coordinates.')
+    parser.add_argument('-s', '--shape', action='store_true',
+                        help='Print the image shape')
+    parser.add_argument('--verbose', action='store_true')
     args = vars(parser.parse_args())
     args['crop_on'] = args['crop'] is not None
     return args
@@ -33,7 +36,8 @@ def crop_image(image, crop_area):
 conf = init()
 input_img = load_input(conf['input'])
 output_img = input_img
-print(conf)
+if (conf['verbose']):
+    print(conf)
 if (conf['crop_on']):
     output_img = crop_image(input_img, conf['crop'])
 flip_on = True
@@ -49,5 +53,7 @@ else:
         flip_on = False
 if (flip_on):
     output_img = cv.flip(output_img, flipCode)
+if (conf['shape']):
+    print(input_img.shape)
 
 cv.imwrite(conf['output'], output_img)

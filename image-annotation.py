@@ -9,21 +9,37 @@ import cv2 as cv
 def init():
     parser = argparse.ArgumentParser(
         description="Image annotation using OpenCV")
-    parser.add_argument('-i', '--input', required=True)
-    parser.add_argument('-o', '--output', required=True)
+    parser.add_argument('-i', '--input', metavar='input_file_name',
+                        required=True)
+    parser.add_argument('-o', '--output', metavar='output_file_name',
+                        required=True)
     parser.add_argument('-l', '--line', nargs=8, type=int,
-                        help='Draw a line (args: x1 y1 x2 y2 r g b thickness)')
+                        help='Draw a line',
+                        metavar=(
+                            'x1', 'y1', 'x2', 'y2', 'r', 'g', 'b', 'thickness'
+                            ))
     parser.add_argument('-c', '--circle', nargs=7, type=int,
-                        help='Draw a circle \
-                            (args: xc yc radius r g b thickness)')
+                        help='Draw a circle',
+                        metavar=(
+                            'xc', 'yc', 'radius', 'r', 'g', 'b', 'thickness'
+                            ))
     parser.add_argument('-r', '--rectangle', nargs=8, type=int,
-                        help='Draw a rectangle \
-                            (args: x1 y1 x2 y2 r g b thickness)')
+                        help='Draw a rectangle',
+                        metavar=(
+                            'x1', 'y1', 'x2', 'y2', 'r', 'g', 'b', 'thickness'
+                            ))
+    parser.add_argument('-t', '--text', nargs=8,
+                        help='Insert a text',
+                        metavar=(
+                            'text', 'btm_lft_x', 'btm_lft_y', 'scale',
+                            'r', 'g', 'b', 'thickness'
+                            ))
     parser.add_argument('-v', '--verbose', action='store_true')
     args = vars(parser.parse_args())
     args['line_on'] = args['line'] is not None
     args['circle_on'] = args['circle'] is not None
     args['rectangle_on'] = args['rectangle'] is not None
+    args['text_on'] = args['text'] is not None
     return args
 
 
@@ -64,5 +80,17 @@ if (conf['rectangle_on']):
                   conf['rectangle'][5],     # G
                   conf['rectangle'][4]),    # R
                  conf['rectangle'][7], lineType=cv.LINE_AA)
+if (conf['text_on']):
+    # 0    1         2         3     4 5 6 7
+    # text btm_lft_x btm_lft_y scale r g b thickness
+    cv.putText(output_img, conf['text'][0],
+               (int(conf['text'][1]), int(conf['text'][2])),
+               cv.FONT_HERSHEY_PLAIN,
+               int(conf['text'][3]),
+               (int(conf['text'][6]),   # B
+                int(conf['text'][5]),   # G
+                int(conf['text'][4])),  # R
+               int(conf['text'][7]),
+               cv.LINE_AA)
 
 cv.imwrite(conf['output'], output_img)
