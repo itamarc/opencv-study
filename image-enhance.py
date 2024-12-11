@@ -7,6 +7,7 @@ import argparse
 #       -a perc
 #       -s perc
 #       -m factor
+#       -t thresh
 def init():
     parser = argparse.ArgumentParser(
         description="Image annotation using OpenCV")
@@ -20,6 +21,8 @@ def init():
                         help='Subtract (reduce brightness)', metavar='perc')
     parser.add_argument('-m', '--mult', type=float,
                         help='Multiply (change contrast)', metavar='factor')
+    parser.add_argument('-t', '--thresh', type=int, metavar='thresh',
+                        help='Convert to binary image using threshold')
     parser.add_argument('-v', '--verbose', action='store_true')
     args = vars(parser.parse_args())
     return args
@@ -49,5 +52,10 @@ if (conf['mult'] is not None):
     matrix_f = np.ones(input_img.shape, dtype="uint8") * conf['mult']
     output_img = np.uint8(np.clip(
         cv.multiply(np.float64(input_img), matrix_f), 0, 255))
+if (conf['thresh'] is not None):
+    gray_img = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)
+    retval, output_img = cv.threshold(
+        gray_img, conf['thresh'], 255, cv.THRESH_BINARY)
+
 
 cv.imwrite(conf['output'], output_img)
