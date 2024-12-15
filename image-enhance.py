@@ -8,6 +8,7 @@ import argparse
 #       -s perc
 #       -m factor
 #       -t thresh
+#       -d blksize const
 def init():
     parser = argparse.ArgumentParser(
         description="Image annotation using OpenCV")
@@ -23,8 +24,13 @@ def init():
                         help='Multiply (change contrast)', metavar='factor')
     parser.add_argument('-t', '--thresh', type=int, metavar='thresh',
                         help='Convert to binary image using threshold')
+    parser.add_argument('-d', '--adapthresh', nargs=2, type=int,
+                        metavar=('block_size', 'constant'),
+                        help='Convert to binary image using an adaptive \
+                            threshold')
     parser.add_argument('-v', '--verbose', action='store_true')
     args = vars(parser.parse_args())
+    args['adapthresh_on'] = args['adapthresh'] is not None
     return args
 
 
@@ -56,6 +62,13 @@ if (conf['thresh'] is not None):
     gray_img = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)
     retval, output_img = cv.threshold(
         gray_img, conf['thresh'], 255, cv.THRESH_BINARY)
+if (conf['adapthresh_on']):
+    gray_img = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)
+    output_img = cv.adaptiveThreshold(gray_img, 255.0,
+                         cv.ADAPTIVE_THRESH_MEAN_C,
+                         cv.THRESH_BINARY,
+                         conf['adapthresh'][0],
+                         float(conf['adapthresh'][1]))
 
 
 cv.imwrite(conf['output'], output_img)
