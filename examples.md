@@ -65,3 +65,36 @@ py .\image-annotation.py -i 'img\lago-pedras.jpg' -o 'out\lago-pedras-annot.jpg'
 ```bash
 py .\image-annotation.py -i 'img\lago-pedras.jpg' -o 'out\lago-pedras-annot.jpg' -l 500 300 1500 300 255 255 0 10 -c 1000 900 300 255 0 0 8 -r 700 1700 1100 2100 255 0 255 5 -t 'Paranoa Lake, Brasilia' 500 250 5 0 0 0 4
 ```
+
+## image-enhance.py
+
+### Addition or brightness
+```bash
+py .\image-enhance.py -i .\img\rua.jpg -o .\out\rua-enh.jpg -a 50
+```
+
+### Subtraction (reduce brightness)
+
+```bash
+py .\image-enhance.py -i .\img\rua.jpg -o .\out\rua-enh.jpg -s 50
+```
+
+### Multiplication or contrast
+
+```bash
+py .\image-enhance.py -i .\img\rua.jpg -o .\out\rua-enh.jpg -m 0.7
+
+py .\image-enhance.py -i .\img\rua.jpg -o .\out\rua-enh.jpg -m 1.5
+```
+
+### Binary images using threshold
+
+```bash
+py .\image-enhance.py -i .\img\barracas.jpg -o .\out\barracas-thresh.jpg -t 100
+```
+
+### Binary images using adaptive threshold
+
+```bash
+py .\image-enhance.py -i .\img\barracas.jpg -o .\out\barracas-thresh.jpg -d 11 7
+```
