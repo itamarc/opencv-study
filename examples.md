@@ -98,3 +98,27 @@ py .\image-enhance.py -i .\img\barracas.jpg -o .\out\barracas-thresh.jpg -t 100
 ```bash
 py .\image-enhance.py -i .\img\barracas.jpg -o .\out\barracas-thresh.jpg -d 11 7
 ```
+
+### Bitwise operation AND
+
+Apply a mask to an image
+
+```bash
+py .\image-enhance.py -i .\img\rio-cidade.jpg -o .\out\rio-cidade-mask.jpg -n .\img\mascara-circulo-1024.png
+```
+
+```bash
+py .\image-enhance.py -i .\img\mascara-metade-1024.png -o out\mask.jpg -n .\img\mascara-circulo-1024.png
+```
+
+### Bitwise operation OR
+
+```bash
+py .\image-enhance.py -i .\img\mascara-metade-1024.png -o out\mask.jpg -r .\img\mascara-circulo-1024.png
+```
+
+### Bitwise operation XOR
+
+```bash
+py .\image-enhance.py -i .\img\mascara-metade-1024.png -o out\mask.jpg -x .\img\mascara-circulo-1024.png
+```

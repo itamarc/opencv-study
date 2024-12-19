@@ -9,6 +9,9 @@ import argparse
 #       -m factor
 #       -t thresh
 #       -d blksize const
+#       -n (AND operator) maskfile
+#       -o (OR operator) maskfile
+#       -x (XOR operator) maskfile
 def init():
     parser = argparse.ArgumentParser(
         description="Image annotation using OpenCV")
@@ -28,9 +31,25 @@ def init():
                         metavar=('block_size', 'constant'),
                         help='Convert to binary image using an adaptive \
                             threshold')
+    parser.add_argument('-n', '--andoper', metavar='mask_file_name',
+                        help='Apply AND operator with mask from file')
+    parser.add_argument('-r', '--oroper', metavar='mask_file_name',
+                        help='Apply OR operator with mask from file')
+    parser.add_argument('-x', '--xoroper', metavar='mask_file_name',
+                        help='Apply XOR operator with mask from file')
     parser.add_argument('-v', '--verbose', action='store_true')
     args = vars(parser.parse_args())
     args['adapthresh_on'] = args['adapthresh'] is not None
+    args['bitwise_oper_on'] = False
+    if (args['andoper'] is not None):
+        args['bitwise_oper'] = 'andoper'
+        args['bitwise_oper_on'] = True
+    if (args['oroper'] is not None):
+        args['bitwise_oper'] = 'oroper'
+        args['bitwise_oper_on'] = True
+    if (args['xoroper'] is not None):
+        args['bitwise_oper'] = 'xoroper'
+        args['bitwise_oper_on'] = True
     return args
 
 
@@ -60,15 +79,38 @@ if (conf['mult'] is not None):
         cv.multiply(np.float64(input_img), matrix_f), 0, 255))
 if (conf['thresh'] is not None):
     gray_img = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)
-    retval, output_img = cv.threshold(
-        gray_img, conf['thresh'], 255, cv.THRESH_BINARY)
+    retval, output_img = cv.threshold(gray_img, conf['thresh'],
+                                      255, cv.THRESH_BINARY)
 if (conf['adapthresh_on']):
     gray_img = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)
     output_img = cv.adaptiveThreshold(gray_img, 255.0,
-                         cv.ADAPTIVE_THRESH_MEAN_C,
-                         cv.THRESH_BINARY,
-                         conf['adapthresh'][0],
-                         float(conf['adapthresh'][1]))
+                                      cv.ADAPTIVE_THRESH_MEAN_C,
+                                      cv.THRESH_BINARY,
+                                      conf['adapthresh'][0],
+                                      float(conf['adapthresh'][1]))
+if (conf['bitwise_oper_on']):
+    mask_file = cv.imread(conf[conf['bitwise_oper']], 0)
+    (y_in, x_in, chan_in) = input_img.shape
+    (y_msk, x_msk) = mask_file.shape
+    if (y_in != y_msk or x_in != x_msk):
+        mask_file = cv.resize(mask_file, (x_in, y_in), cv.INTER_LINEAR)
+    retval, img_mask = cv.threshold(mask_file, 127, 255, cv.THRESH_BINARY)
+    input_img_b, input_img_g, input_img_r = cv.split(input_img)
+    if (conf['andoper'] is not None):
+        input_img_b_masked = cv.bitwise_and(input_img_b, img_mask)
+        input_img_g_masked = cv.bitwise_and(input_img_g, img_mask)
+        input_img_r_masked = cv.bitwise_and(input_img_r, img_mask)
+    if (conf['oroper'] is not None):
+        input_img_b_masked = cv.bitwise_or(input_img_b, img_mask)
+        input_img_g_masked = cv.bitwise_or(input_img_g, img_mask)
+        input_img_r_masked = cv.bitwise_or(input_img_r, img_mask)
+    if (conf['xoroper'] is not None):
+        input_img_b_masked = cv.bitwise_xor(input_img_b, img_mask)
+        input_img_g_masked = cv.bitwise_xor(input_img_g, img_mask)
+        input_img_r_masked = cv.bitwise_xor(input_img_r, img_mask)
+    output_img = cv.merge((input_img_b_masked,
+                           input_img_g_masked,
+                           input_img_r_masked))
 
 
 cv.imwrite(conf['output'], output_img)
